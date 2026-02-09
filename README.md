@@ -41,7 +41,7 @@ newgrp docker
 docker run hello-world
 ```
 
-#### GPU Support (Optional)
+#### Nvidia GPU Support (Optional)
 
 For better Gazebo performance with NVIDIA GPUs:
 
@@ -89,16 +89,33 @@ This takes 10-15 minutes on first run.
 | **[Lab 1](lab1/README.md)** | Building a Robot in Gazebo | 2 sessions | Follow Gazebo tutorials to build a mobile robot with sensors |
 | **[Lab 2](lab2/README.md)** | ROS2 Integration | 2 sessions | Create ROS2 nodes, control the robot, visualize sensor data |
 
-### Workflow
+### Development Workflow
 
-1. **Edit code** on your host machine (outside container) with your IDE
-2. **Build and run** inside container:
+**The typical development cycle:**
+
+1. **Edit files** on your host machine (outside container) using your favorite IDE
+   - Files in `/home/YOUR_USER/robotics_lpnu/` are automatically visible inside container at `/opt/ws/src/code/`
+
+2. **Enter container** (if not already inside):
    ```bash
-   # Inside container (you'll be at /opt/ws by default)
+   ./scripts/cmd bash
+   ```
+
+3. **Build your code** inside container:
+   ```bash
    colcon build
    source install/setup.bash
-   # Then run your commands (gz sim, ros2 launch, etc.)
    ```
+
+4. **Run and test** inside container:
+   ```bash
+   gz sim worlds/robot.sdf        # For Lab 1
+   ros2 launch lab2 ...            # For Lab 2
+   ```
+
+5. **Repeat** steps 1-4 as needed
+
+**Important**: Changes to files are instant (no rebuild needed for world files, Python changes need rebuild).
 
 ### Useful Workspace Commands
 

@@ -171,12 +171,13 @@ Your final package will look like this:
 
 ```
 lab2/
-├── package.xml              # ROS2 package manifest
-├── setup.py                 # Python package setup
+├── package.xml              # ROS2 package manifest (dependencies)
+├── setup.py                 # Python package setup (build config)
+├── setup.cfg                # Setuptools config (script paths)
 ├── resource/
-│   └── lab2                 # Empty marker file
+│   └── lab2                 # Empty marker file (required by ament)
 ├── lab2/                    # Python package directory
-│   ├── __init__.py
+│   ├── __init__.py          # Makes this a Python package
 │   ├── robot_controller.py  # Publisher: controls robot
 │   └── lidar_subscriber.py  # Subscriber: processes LiDAR
 ├── launch/
@@ -186,6 +187,12 @@ lab2/
 └── config/
     └── robot.rviz           # RViz2 configuration
 ```
+
+**Key files:**
+- `package.xml` - Lists all package dependencies (like `requirements.txt` in Python)
+- `setup.py` - Tells `colcon build` what to install and where
+- `setup.cfg` - Ensures executables install to correct location for `ros2 run`
+- `resource/lab2` - Empty file required by ament_python packages
 
 ---
 
@@ -230,50 +237,87 @@ The `ros2 pkg create` command already created a basic `package.xml`. You need to
 
 ### Step 1.3: Update `setup.py`
 
-Edit `/opt/ws/src/code/lab2/setup.py` to add data files for launch, worlds, and config:
+Edit `/opt/ws/src/code/lab2/setup.py` to add data files for launch, worlds, and config.
 
-The `ros2 pkg create` command already created a basic `setup.py`. You need to:
+The `ros2 pkg create` command already created a basic `setup.py`. You need to modify it:
 
-1. **Add imports** at the top:
-   ```python
-   import os
-   from glob import glob
-   ```
+**Complete `setup.py` should look like:**
 
-2. **Add data_files** for launch, worlds, and config directories in the `data_files` list:
-   ```python
-   (os.path.join('share', package_name, 'launch'), 
-    glob(os.path.join('launch', '*launch.[pxy]*'))),
-   (os.path.join('share', package_name, 'worlds'), 
-    glob(os.path.join('worlds', '*.sdf'))),
-   (os.path.join('share', package_name, 'config'), 
-    glob(os.path.join('config', '*.rviz'))),
-   ```
+```python
+from setuptools import setup, find_packages
+import os
+from glob import glob
 
-3. **Add entry_points** (you'll fill this in later when you create the nodes):
-   ```python
-   entry_points={
-       'console_scripts': [
-           'robot_controller = lab2.robot_controller:main',
-           'lidar_subscriber = lab2.lidar_subscriber:main',
-       ],
-   },
-   ```
+package_name = 'lab2'
 
-**Your final `setup.py` should look similar to [this example](https://classes.cs.uchicago.edu/archive/2025/fall/20600-1/ros2_intro.html).**
+setup(
+    name=package_name,
+    version='0.0.1',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'), 
+         glob(os.path.join('launch', '*launch.[pxy]*'))),
+        (os.path.join('share', package_name, 'worlds'), 
+         glob(os.path.join('worlds', '*.sdf'))),
+        (os.path.join('share', package_name, 'config'), 
+         glob(os.path.join('config', '*.rviz'))),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='Your Name',
+    maintainer_email='your.email@lpnu.ua',
+    description='Lab 2: ROS2 Integration with Gazebo',
+    license='Apache-2.0',
+    tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+            'robot_controller = lab2.robot_controller:main',
+            'lidar_subscriber = lab2.lidar_subscriber:main',
+        ],
+    },
+)
+```
 
-### Step 1.4: Create Additional Directories
+**Key changes from the generated file:**
+- Added `import os` and `from glob import glob` at the top
+- Added three new entries in `data_files` list for launch, worlds, and config directories
+- Added `entry_points` with two console scripts (executables you'll create)
+
+### Step 1.4: Create `setup.cfg`
+
+Create `/opt/ws/src/code/lab2/setup.cfg` with this content:
+
+```ini
+[develop]
+script_dir=$base/lib/lab2
+[install]
+install_scripts=$base/lib/lab2
+```
+
+**Why is this needed?**
+- By default, setuptools installs scripts to `bin/`
+- ROS2's `ros2 run` looks for executables in `lib/<package_name>/`
+- This file tells setuptools to install scripts to the correct location
+
+**Without `setup.cfg`:** You'll get `No executable found` errors when running `ros2 run lab2 robot_controller`
+
+### Step 1.5: Create Additional Directories
 
 ```bash
 cd /opt/ws/src/code/lab2
 mkdir -p launch worlds config
 ```
 
-### Step 1.5: Copy Robot World
+### Step 1.6: Copy Robot World
 
 ```bash
 cp /opt/ws/src/code/lab1/worlds/robot.sdf /opt/ws/src/code/lab2/worlds/
 ```
+
+Now your package structure is ready! Let's create the launch file next.
 
 ---
 
@@ -701,85 +745,6 @@ ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
 
 # Press Ctrl+C to stop
 ```
-
-### Visualize Node Graph
-
-```bash
-# See how nodes connect via topics
-rqt_graph
-```
-
-This opens a graphical view of your ROS system!
-
----
-
-## Task 8: Experiments and Challenges
-
-### Challenge 1: Obstacle Avoidance
-
-Modify `robot_controller.py` to:
-1. Subscribe to `/lidar` topic
-2. Slow down or turn when obstacle is close (< 1m)
-3. Combine publisher and subscriber in one node!
-
-**Hint:**
-```python
-class RobotController(Node):
-    def __init__(self):
-        super().__init__('robot_controller')
-        
-        # Publisher for velocity
-        self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        
-        # Subscriber for LiDAR
-        self.lidar_sub = self.create_subscription(
-            LaserScan, '/lidar', self.lidar_callback, 10
-        )
-        
-        # Store minimum distance
-        self.min_distance = float('inf')
-        
-        # Timer for control loop
-        self.timer = self.create_timer(0.1, self.control_callback)
-    
-    def lidar_callback(self, msg):
-        # Update minimum distance
-        valid = [r for r in msg.ranges if 0.1 < r < 10.0]
-        self.min_distance = min(valid) if valid else float('inf')
-    
-    def control_callback(self):
-        msg = Twist()
-        
-        if self.min_distance < 1.0:
-            # Obstacle close! Turn away
-            self.get_logger().warn(f'Avoiding obstacle at {self.min_distance:.2f}m')
-            msg.linear.x = 0.0
-            msg.angular.z = 1.0
-        else:
-            # Clear path, move forward
-            msg.linear.x = 0.5
-            msg.angular.z = 0.0
-        
-        self.publisher.publish(msg)
-```
-
-### Challenge 2: Wall Following
-
-Make the robot follow the wall on its right:
-1. Get distances to the right side from LiDAR
-2. Adjust turning to maintain constant distance (~0.5m)
-3. Use proportional control: `angular.z = K * (desired - actual)`
-
-### Challenge 3: Keyboard Control
-
-Create a teleop node that reads keyboard input:
-1. W/S for forward/backward
-2. A/D for turning left/right
-3. Space to stop
-
-Look at the [teleop_twist_keyboard](https://index.ros.org/p/teleop_twist_keyboard/) package for inspiration.
-
----
 
 ## Understanding the Bridge
 

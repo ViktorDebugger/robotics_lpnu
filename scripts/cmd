@@ -23,7 +23,7 @@ case "$1" in
             robotics_intro
         ;;
     bash)
-        docker exec -it robotics_intro bash
+        docker exec -it -w /opt/ws robotics_intro bash -c "source /opt/ros/jazzy/setup.bash && source install/setup.bash 2>/dev/null || true; exec bash"
         ;;
     build-workspace)
         docker exec -it robotics_intro bash -c "cd /opt/ws && colcon build"
