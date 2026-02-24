@@ -1,0 +1,65 @@
+# 1. Запускаємо контейнер з репозиторію (як зазвичай)
+./scripts/cmd run
+
+# 2. Заходимо в уже запущений контейнер у новому терміналі (якщо потрібно працювати в іншому вікні)
+./scripts/cmd bash
+
+# 3. Всередині контейнера перезбираємо робочий простір (якщо були зміни в коді або SDF)
+colcon build
+# Після цього завжди потрібно source, щоб нові пакети підхопилися
+source install/setup.bash
+
+# 4. Запускаємо першу лабораторну роботу (симуляцію Gazebo)
+gz sim install/lab1/share/lab1/worlds/robot.sdf
+
+# 4.1. Запуск плагіну зчитування натискання клавіш
+gz topic -e -t /keyboard/keypress
+
+# 4.2 Запуск плагіну роботи з IMU сенсором
+gz topic -e -t /imu
+
+# 4.3 Запуск плагіну роботи з дотиком
+gz topic -e -t /wall/touched
+
+# 4.3 Запуск плагіну роботи з LiDAR
+gz topic -e -t /lidar | grep -v "intensities"
+
+# 5. В іншому терміналі на хості (не в контейнері!) дивимося, чи використовується GPU
+# (має бути GPU-Util > 0%, Memory > 100 MiB, бажано процеси ruby/gzserver)
+nvidia-smi
+# або в режимі оновлення кожні 0.5 секунди:
+# watch -n 0.5 nvidia-smi
+
+# ────────────────────────────────────────────────────────────────
+# Нижче — команди, які потрібно виконати на хості (поза контейнером)
+# ────────────────────────────────────────────────────────────────
+
+# 6. Відкриваємо/редагуємо конфіг Docker, щоб переконатися, що NVIDIA runtime за замовчуванням
+sudo nano /etc/docker/daemon.json
+# Повинно бути приблизно так (якщо немає — додай і перезапусти docker):
+# {
+#   "runtimes": {
+#     "nvidia": {
+#       "path": "nvidia-container-runtime",
+#       "runtimeArgs": []
+#     }
+#   },
+#   "default-runtime": "nvidia"
+# }
+# Після змін: sudo systemctl restart docker
+
+# 7. Перевіряємо, чи NVIDIA runtime активний і встановлений за замовчуванням
+docker info | grep -i runtime
+
+# 8. Перевіряємо поточний режим PRIME (on-demand / nvidia / intel)
+prime-select query
+# Якщо показує "on-demand" → зазвичай Gazebo падає на AMD iGPU
+# Рекомендую перемкнути на повний NVIDIA (стабільніше для Gazebo):
+# sudo prime-select nvidia
+# sudo reboot
+# Після ребута перевір: prime-select query   → має бути "nvidia"
+
+# 9. Дозволяємо контейнеру (включаючи root) підключатися до X-сервера на хості
+# Виконуй після кожного ребута Ubuntu / перезапуску X-сервера
+xhost +local:docker
+xhost +local:root   # особливо важливо, бо в контейнері часто root
