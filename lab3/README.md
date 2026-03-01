@@ -20,21 +20,14 @@ source install/setup.bash
 
 ## Launch Options
 
-**Gazebo only** (manual testing):
-```bash
-ros2 launch lab3 gazebo.launch.py
-```
-
 **Full bringup** (Gazebo + path publisher + RViz2):
 ```bash
 ros2 launch lab3 bringup.launch.py
 ```
-
-**Without RViz** (if GUI fails in Docker):
+**Gazebo only** (manual testing):
 ```bash
-ros2 launch lab3 bringup.launch.py rviz:=false
+ros2 launch lab3 gazebo.launch.py
 ```
-
 ---
 
 ## Base Code
