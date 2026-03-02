@@ -6,6 +6,8 @@
 - Odometry feedback for path following
 - RViz2 trajectory visualization
 
+**Further reading:** [Calculating Wheel Odometry for a Differential Drive Robot](https://automaticaddison.com/calculating-wheel-odometry-for-a-differential-drive-robot/).
+
 ---
 
 ## Setup
