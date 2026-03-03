@@ -2,6 +2,7 @@
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess
 
+
 def generate_launch_description():
     robot_world = '/opt/ws/src/code/lab3/worlds/robot.sdf'
 
@@ -12,7 +13,7 @@ def generate_launch_description():
 
     bridge_cmd_vel = ExecuteProcess(
         cmd=['ros2', 'run', 'ros_gz_bridge', 'parameter_bridge',
-             '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist'],
+             '/cmd_vel@geometry_msgs/msg/TwistStamped@gz.msgs.Twist'],
         output='screen'
     )
 

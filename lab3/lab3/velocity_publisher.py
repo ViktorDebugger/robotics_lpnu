@@ -1,7 +1,7 @@
 """Publish constant velocity for testing. Prints wheel speeds from diff_drive_math."""
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import TwistStamped
 
 from .diff_drive_math import twist_to_wheel_speeds, curve_radius
 
@@ -16,7 +16,7 @@ class VelocityPublisher(Node):
         self.declare_parameter("wheel_radius", 0.15)
         self.declare_parameter("wheel_separation", 0.7)
 
-        self.pub = self.create_publisher(Twist, "/cmd_vel", 10)
+        self.pub = self.create_publisher(TwistStamped, "/cmd_vel", 10)
         period = 1.0 / max(float(self.get_parameter("rate_hz").value), 1.0)
         self.timer = self.create_timer(period, self.on_timer)
 
@@ -26,9 +26,11 @@ class VelocityPublisher(Node):
         v = float(self.get_parameter("linear_x").value)
         w = float(self.get_parameter("angular_z").value)
 
-        msg = Twist()
-        msg.linear.x = v
-        msg.angular.z = w
+        msg = TwistStamped()
+        msg.header.frame_id = 'base_link'
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.twist.linear.x = v
+        msg.twist.angular.z = w
         self.pub.publish(msg)
 
         r = curve_radius(v, w)

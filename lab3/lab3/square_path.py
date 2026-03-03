@@ -4,7 +4,7 @@ import math
 
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, TwistStamped
 from nav_msgs.msg import Odometry
 
 
@@ -15,11 +15,13 @@ class SquarePath(Node):
         self.declare_parameter('side_length', 2.0)
         self.declare_parameter('linear_speed', 0.4)
         self.declare_parameter('angular_speed', 0.8)
+        self.declare_parameter('odom_topic', '/model/vehicle_blue/odometry')
 
-        self.pub = self.create_publisher(Twist, "/cmd_vel", 10)
+        odom_topic = self.get_parameter('odom_topic').value
+        self.pub = self.create_publisher(TwistStamped, "/cmd_vel", 10)
         self.odom_sub = self.create_subscription(
             Odometry,
-            '/model/vehicle_blue/odometry',
+            odom_topic,
             self.odom_callback,
             10
         )
@@ -46,7 +48,7 @@ class SquarePath(Node):
             time.sleep(0.3)
 
         self.get_logger().info("Square complete!")
-        self.pub.publish(Twist())
+        self.pub.publish(TwistStamped())
 
     def odom_callback(self, msg: Odometry):
         self.current_x = msg.pose.pose.position.x
@@ -62,8 +64,10 @@ class SquarePath(Node):
         start_y = self.current_y
         speed = self.get_parameter('linear_speed').value
 
-        cmd = Twist()
-        cmd.linear.x = speed
+        cmd = TwistStamped()
+        cmd.header.frame_id = 'base_link'
+        cmd.twist.linear.x = speed
+        cmd.header.stamp = self.get_clock().now().to_msg()
 
         while True:
             dx = self.current_x - start_x
@@ -73,15 +77,17 @@ class SquarePath(Node):
             self.pub.publish(cmd)
             rclpy.spin_once(self, timeout_sec=0.01)
 
-        cmd.linear.x = 0.0
+        cmd.twist.linear.x = 0.0
         self.pub.publish(cmd)
 
     def turn(self, angle):
         start_theta = self.current_theta
         speed = self.get_parameter('angular_speed').value
 
-        cmd = Twist()
-        cmd.angular.z = speed
+        cmd = TwistStamped()
+        cmd.header.frame_id = 'base_link'
+        cmd.twist.angular.z = speed
+        cmd.header.stamp = self.get_clock().now().to_msg()
 
         while True:
             turned = self.current_theta - start_theta
@@ -94,7 +100,7 @@ class SquarePath(Node):
             self.pub.publish(cmd)
             rclpy.spin_once(self, timeout_sec=0.01)
 
-        cmd.angular.z = 0.0
+        cmd.twist.angular.z = 0.0
         self.pub.publish(cmd)
 
 

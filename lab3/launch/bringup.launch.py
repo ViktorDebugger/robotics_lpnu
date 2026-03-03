@@ -19,7 +19,7 @@ def launch_setup(context):
 
     bridge_cmd_vel = ExecuteProcess(
         cmd=['ros2', 'run', 'ros_gz_bridge', 'parameter_bridge',
-             '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist'],
+             '/cmd_vel@geometry_msgs/msg/TwistStamped@gz.msgs.Twist'],
         output='screen'
     )
 
