@@ -1,4 +1,8 @@
-"""Launch TurtleBot3 + odom path + dead reckoning. Run circle_path in another terminal."""
+"""Launch TurtleBot3 + odom path + dead reckoning.
+
+In another terminal, run:
+  ros2 run lab3 circle_path --ros-args -p odom_topic:=/odom -p use_sim_time:=true
+"""
 import os
 from launch import LaunchDescription
 from launch.actions import (
@@ -63,8 +67,8 @@ def launch_setup(context):
             "lab3",
             "odom_path_publisher",
             "--ros-args",
-            "-p",
-            "odom_topic:=/odom",
+            "-p", "odom_topic:=/odom",
+            "-p", "use_sim_time:=true",
         ],
         output="screen",
     )
@@ -76,8 +80,8 @@ def launch_setup(context):
             "lab4",
             "dead_reckoning",
             "--ros-args",
-            "-p",
-            "ground_truth_topic:=/odom",
+            "-p", "ground_truth_topic:=/odom",
+            "-p", "use_sim_time:=true",
         ],
         output="screen",
     )
