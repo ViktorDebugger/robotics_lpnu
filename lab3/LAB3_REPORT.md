@@ -234,3 +234,36 @@ For TurtleBot3, add `-p odom_topic:=/odom` to `square_path` and `circle_path`.
 - **Lab 3** implements path following for differential-drive robots: square (odometry-based), circle, and figure-8 (timed).
 - **Tasks 1–3** are complete: square and circle run on both robots; figure-8 is implemented; RViz2 shows the trajectory on `/path`.
 - Parameters are adapted to the custom robot (`robot.sdf`) and can be overridden for TurtleBot3.
+
+---
+
+## 8. Deliverables
+
+### 8.1 Best parameters for square path
+
+For the custom 4-wheel robot (`robot.sdf`) with odometry at 1 Hz:
+
+| Parameter | Value | Reason |
+|-----------|-------|--------|
+| `side_length` | 2.0 | Stable square size. |
+| `linear_speed` | 0.4 | Good balance of speed and control. |
+| `angular_speed` | **0.25** | Avoids turn overshoot; odometry at 1 Hz cannot track 0.8 rad/s accurately. |
+| `odom_topic` | `/model/vehicle_blue/odometry` | For 4-wheel robot; use `/odom` for TurtleBot3. |
+
+Example:
+
+```bash
+ros2 run lab3 square_path --ros-args -p angular_speed:=0.25
+```
+
+### 8.2 Brief answers
+
+**What is differential drive?**  
+A differential drive robot has two independently driven wheels on the same axis. Linear velocity (v) and angular velocity (ω) are produced by different left/right wheel speeds. The robot turns by rotating one wheel faster than the other; it moves straight when both wheels spin at the same speed.
+
+**Why might the square drift?**  
+The square can drift because:
+
+- **Odometry errors** — wheel slip, uneven surface, or imperfect odometry model accumulate over time.
+- **Turn overshoot/undershoot** — low odometry frequency (e.g. 1 Hz) or high angular speed make it hard to stop exactly at 90°.
+- **Physical differences** — unequal wheel diameters or encoder resolution cause systematic drift.
