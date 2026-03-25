@@ -4,6 +4,7 @@ import math
 
 import rclpy
 from rclpy.node import Node
+from rclpy.duration import Duration
 from geometry_msgs.msg import TwistStamped
 
 from .diff_drive_math import twist_to_wheel_speeds
@@ -18,6 +19,7 @@ class Figure8Path(Node):
         self.declare_parameter("wheel_radius", 0.4)
         self.declare_parameter("wheel_separation", 1.2)
         self.declare_parameter("rate_hz", 20.0)
+        # use_sim_time is declared by ROS2; pass -p use_sim_time:=true when in simulation
 
         self.pub = self.create_publisher(TwistStamped, "/cmd_vel", 10)
 
@@ -28,7 +30,8 @@ class Figure8Path(Node):
         wheel_r = float(self.get_parameter("wheel_radius").value)
         wheel_s = float(self.get_parameter("wheel_separation").value)
 
-        duration = 2.0 * math.pi / max(abs(w), 1e-6)
+        # Slight margin (2%) so the loop closes despite discrete timesteps
+        duration = (2.0 * math.pi / max(abs(w), 1e-6)) * 1.02
         wl_left, wr_left = twist_to_wheel_speeds(v, w, wheel_r, wheel_s)
         wl_right, wr_right = twist_to_wheel_speeds(v, -w, wheel_r, wheel_s)
 
@@ -47,9 +50,10 @@ class Figure8Path(Node):
             msg.twist.linear.x = v
             msg.twist.angular.z = angular_z
 
-            t_end = time.time() + duration
-            while time.time() < t_end:
-                msg.header.stamp = self.get_clock().now().to_msg()
+            clock = self.get_clock()
+            t_end = clock.now() + Duration(nanoseconds=int(duration * 1e9))
+            while clock.now() < t_end:
+                msg.header.stamp = clock.now().to_msg()
                 self.pub.publish(msg)
                 rclpy.spin_once(self, timeout_sec=0.0)
                 time.sleep(dt)
