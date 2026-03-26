@@ -9,6 +9,7 @@ from launch.actions import (
     IncludeLaunchDescription,
     OpaqueFunction,
     SetEnvironmentVariable,
+    TimerAction,
 )
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
@@ -23,7 +24,16 @@ def launch_setup(context, *args, **kwargs):
 
     world = os.path.join(lab6_share, "worlds", "room_nav2.sdf")
     map_yaml = os.path.join(lab6_share, "maps", "room_nav2.yaml")
-    params_file = os.path.join(lab6_share, "config", "nav2_params.yaml")
+    profile = LaunchConfiguration("params_profile").perform(context).strip().lower()
+    if profile == "navfn_dijkstra":
+        params_name = "nav2_params_navfn_dijkstra.yaml"
+    elif profile in ("regulated_pp", "rpp"):
+        params_name = "nav2_params_rpp.yaml"
+    elif profile in ("smac2d", "smac_2d"):
+        params_name = "nav2_params_smac2d.yaml"
+    else:
+        params_name = "nav2_params.yaml"
+    params_file = os.path.join(lab6_share, "config", params_name)
 
     default_rviz = os.path.join(
         nav2_bringup_share, "rviz", "nav2_default_view.rviz"
@@ -83,12 +93,15 @@ def launch_setup(context, *args, **kwargs):
         }.items(),
     )
 
+    nav2_delay_s = float(LaunchConfiguration("nav2_startup_delay").perform(context))
+    nav2_delayed = TimerAction(period=nav2_delay_s, actions=[nav2])
+
     actions = [
         gzserver,
         gzclient,
         spawn_turtlebot,
         robot_state_publisher,
-        nav2,
+        nav2_delayed,
     ]
     if use_rviz:
         actions.append(
@@ -129,6 +142,22 @@ def generate_launch_description():
                 "rviz_config",
                 default_value=default_rviz,
                 description="RViz2 config file",
+            ),
+            DeclareLaunchArgument(
+                "params_profile",
+                default_value="default",
+                description=(
+                    "Nav2 params: default (NavFn A* + DWB), navfn_dijkstra, "
+                    "smac2d, regulated_pp or rpp (Regulated Pure Pursuit)"
+                ),
+            ),
+            DeclareLaunchArgument(
+                "nav2_startup_delay",
+                default_value="7.0",
+                description=(
+                    "Seconds to wait after Gazebo/spawn before starting Nav2 "
+                    "(avoids lifecycle_manager timing out while the sim is still booting)."
+                ),
             ),
             OpaqueFunction(function=launch_setup),
         ]

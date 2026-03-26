@@ -157,6 +157,34 @@ The default **FollowPath** plugin is **DWB** (`dwb_core::DWBLocalPlanner`). Repl
 
 Keep `enable_stamped_cmd_vel: true` on the controller so `/cmd_vel` works with TurtleBot3 and Gazebo in this course.
 
+### Alternate Nav2 profiles (optional tasks 3–4)
+
+The tuned baseline uses **NavFn with A\*** and **DWB** in `lab6/config/nav2_params.yaml`. Optional profiles are selected at launch:
+
+```bash
+ros2 launch lab6 nav2_room_bringup.launch.py
+ros2 launch lab6 nav2_room_bringup.launch.py params_profile:=navfn_dijkstra
+ros2 launch lab6 nav2_room_bringup.launch.py params_profile:=smac2d
+ros2 launch lab6 nav2_room_bringup.launch.py params_profile:=rpp
+```
+
+`navfn_dijkstra` loads `nav2_params_navfn_dijkstra.yaml` (**NavFn** with `use_astar: false`). `smac2d` loads `nav2_params_smac2d.yaml` (**Smac Planner 2D**). `rpp` (or `regulated_pp`) loads `nav2_params_rpp.yaml` (**Regulated Pure Pursuit** as `FollowPath`).
+
+---
+
+## How to verify
+
+1. **Environment:** Rebuild the course Docker image if you have not already (`./scripts/cmd build-docker`), then enter the container (`./scripts/cmd run` or `./scripts/cmd bash`).
+2. **Build:** From `/opt/ws`: `colcon build --packages-select lab6 && source install/setup.bash`.
+3. **Launch:** `ros2 launch lab6 nav2_room_bringup.launch.py` — expect Gazebo (server + GUI), TurtleBot3 at the origin, and RViz with the default Nav2 view.
+4. **Topics:** `ros2 topic list | egrep 'map|amcl|plan|costmap|cmd_vel'` should show `/map`, AMCL, planner, costmaps, and command velocity topics. `ros2 node list` should include Nav2 nodes (`controller_server`, `planner_server`, `bt_navigator`, and others).
+5. **Localization:** In RViz, set **Fixed Frame** to `map`. Use **2D Pose Estimate** so the robot on the map matches Gazebo; repeat until stable.
+6. **Navigation:** Send **Nav2 Goal**. Confirm a global path appears, the robot moves along it, local costmap updates near obstacles, and the goal completes without endless recovery (within simulation noise).
+7. **Parameter reload:** After editing any `lab6/config/nav2_params*.yaml`, run `colcon build --packages-select lab6 && source install/setup.bash` and launch again (Nav2 reads the file at startup).
+8. **Optional profiles:** Repeat steps 5–6 with `params_profile:=navfn_dijkstra`, `params_profile:=smac2d`, and `params_profile:=rpp`; compare global path shape (NavFn vs Smac) and cornering / stopping (DWB vs RPP).
+
+A filled-in lab report (parameter table, global vs local summary, optional comparisons) is in **[Lab 6 report](LAB6_REPORT.md)**.
+
 ---
 
 ## Deliverables

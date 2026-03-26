@@ -8,9 +8,11 @@ from launch.actions import (
     DeclareLaunchArgument,
     OpaqueFunction,
     AppendEnvironmentVariable,
+    TimerAction,
 )
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -57,19 +59,37 @@ def launch_setup(context):
     )
 
     obstacle_avoidance = ExecuteProcess(
-        cmd=["ros2", "run", "lab5", "obstacle_avoidance"],
+        cmd=[
+            "ros2",
+            "run",
+            "lab5",
+            "obstacle_avoidance",
+            "--ros-args",
+            "-p",
+            "use_sim_time:=true",
+            "-p",
+            "goal_x:=3.0",
+            "-p",
+            "goal_y:=2.0",
+        ],
         output="screen",
     )
 
     actions = [
         gzserver,
         gzclient,
-        spawn_turtlebot,
+        TimerAction(period=5.0, actions=[spawn_turtlebot]),
         robot_state_publisher,
         obstacle_avoidance,
     ]
     if use_rviz:
-        rviz = ExecuteProcess(cmd=["rviz2", "-d", rviz_config], output="screen")
+        rviz = Node(
+            package="rviz2",
+            executable="rviz2",
+            arguments=["-d", rviz_config],
+            parameters=[{"use_sim_time": True}],
+            output="screen",
+        )
         actions.append(rviz)
 
     return actions

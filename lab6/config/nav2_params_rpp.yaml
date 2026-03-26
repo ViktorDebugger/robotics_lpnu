@@ -92,53 +92,41 @@ controller_server:
       xy_goal_tolerance: 0.2
       yaw_goal_tolerance: 0.35
     FollowPath:
-      plugin: "dwb_core::DWBLocalPlanner"
-      debug_trajectory_details: false
-      min_vel_x: 0.0
-      min_vel_y: 0.0
-      max_vel_x: 0.45
-      max_vel_y: 0.0
-      max_vel_theta: 1.2
-      min_speed_xy: 0.0
-      max_speed_xy: 0.45
-      min_speed_theta: 0.0
-      acc_lim_x: 2.0
-      acc_lim_y: 0.0
-      acc_lim_theta: 0.9
-      decel_lim_x: -2.0
-      decel_lim_y: 0.0
-      decel_lim_theta: -1.0
-      vx_samples: 20
-      vy_samples: 0
-      vtheta_samples: 40
-      sim_time: 1.5
-      linear_granularity: 0.05
-      angular_granularity: 0.025
-      transform_tolerance: 0.2
-      xy_goal_tolerance: 0.2
-      trans_stopped_velocity: 0.08
-      short_circuit_trajectory_evaluation: true
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      max_linear_vel: 0.45
+      min_linear_vel: 0.0
+      max_angular_vel: 1.2
+      min_angular_vel: -1.2
+      max_linear_accel: 2.0
+      max_linear_decel: -2.0
+      max_angular_accel: 2.5
+      max_angular_decel: -2.5
+      lookahead_dist: 0.45
+      min_lookahead_dist: 0.25
+      max_lookahead_dist: 0.75
+      lookahead_time: 1.5
+      rotate_to_heading_angular_vel: 1.0
+      use_velocity_scaled_lookahead_dist: true
+      min_approach_linear_velocity: 0.05
+      approach_velocity_scaling_dist: 0.55
+      use_collision_detection: true
+      max_allowed_time_to_collision_up_to_carrot: 1.0
+      use_regulated_linear_velocity_scaling: true
+      use_fixed_curvature_lookahead: false
+      curvature_lookahead_dist: 0.45
+      use_cost_regulated_linear_velocity_scaling: true
+      cost_scaling_dist: 0.5
+      cost_scaling_gain: 1.0
+      regulated_linear_scaling_min_radius: 0.45
+      regulated_linear_scaling_min_speed: 0.2
+      use_rotate_to_heading: true
+      allow_reversing: false
+      rotate_to_heading_min_angle: 0.785
+      min_distance_to_obstacle: -1.0
       stateful: true
-      critics:
-        [
-          "RotateToGoal",
-          "Oscillation",
-          "BaseObstacle",
-          "GoalAlign",
-          "PathAlign",
-          "PathDist",
-          "GoalDist",
-        ]
-      BaseObstacle.scale: 0.02
-      PathAlign.scale: 32.0
-      PathAlign.forward_point_distance: 0.1
-      GoalAlign.scale: 24.0
-      GoalAlign.forward_point_distance: 0.1
-      PathDist.scale: 32.0
-      GoalDist.scale: 24.0
-      RotateToGoal.scale: 32.0
-      RotateToGoal.slowing_factor: 5.0
-      RotateToGoal.lookahead_time: -1.0
+      use_dynamic_window: false
+      allow_obstacle_checking_beyond_goal: false
+      transform_tolerance: 0.2
       enable_stamped_cmd_vel: true
 
 local_costmap:

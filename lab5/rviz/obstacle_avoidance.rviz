@@ -22,6 +22,7 @@ Visualization Manager:
       Shape: Arrow
   Global Options:
     Fixed Frame: odom
+    Use sim time: true
   Tools:
     - Class: rviz_default_plugins/Interact
     - Class: rviz_default_plugins/MoveCamera
