@@ -31,6 +31,8 @@ def launch_setup(context, *args, **kwargs):
         params_name = "nav2_params_rpp.yaml"
     elif profile in ("smac2d", "smac_2d"):
         params_name = "nav2_params_smac2d.yaml"
+    elif profile == "old":
+        params_name = "old.yaml"
     else:
         params_name = "nav2_params.yaml"
     params_file = os.path.join(lab6_share, "config", params_name)
@@ -148,7 +150,8 @@ def generate_launch_description():
                 default_value="default",
                 description=(
                     "Nav2 params: default (NavFn A* + DWB), navfn_dijkstra, "
-                    "smac2d, regulated_pp or rpp (Regulated Pure Pursuit)"
+                    "smac2d, regulated_pp or rpp (Regulated Pure Pursuit), "
+                    "old (initial lab defaults in old.yaml)"
                 ),
             ),
             DeclareLaunchArgument(

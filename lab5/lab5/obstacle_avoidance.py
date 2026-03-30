@@ -59,7 +59,9 @@ class ObstacleAvoidanceNode(Node):
             return
 
         dist_to_goal = math.sqrt((self.goal_x - self.x)**2 + (self.goal_y - self.y)**2)
-        if dist_to_goal < 0.2:
+        self.get_logger().info(str(dist_to_goal))
+
+        if dist_to_goal < 0.001:
             self.get_logger().info("Goal reached!", throttle_duration_sec=2.0)
             self.pub_cmd.publish(TwistStamped())
             return

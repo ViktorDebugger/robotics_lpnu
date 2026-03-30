@@ -70,8 +70,8 @@ controller_server:
   ros__parameters:
     # Required for controller_server's TwistPublisher (cmd_vel -> cmd_vel_nav); not inherited from FollowPath.
     enable_stamped_cmd_vel: true
-    controller_frequency: 20.0
-    costmap_update_timeout: 0.35
+    controller_frequency: 4.0
+    costmap_update_timeout: 0.30
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.001
     min_theta_velocity_threshold: 0.001
@@ -89,34 +89,34 @@ controller_server:
     goal_checker:
       stateful: true
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.2
-      yaw_goal_tolerance: 0.35
+      xy_goal_tolerance: 0.75
+      yaw_goal_tolerance: 1.2
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
-      debug_trajectory_details: false
+      debug_trajectory_details: true
       min_vel_x: 0.0
       min_vel_y: 0.0
-      max_vel_x: 0.55
+      max_vel_x: 1.2
       max_vel_y: 0.0
-      max_vel_theta: 1.4
+      max_vel_theta: 2.5
       min_speed_xy: 0.0
-      max_speed_xy: 0.55
+      max_speed_xy: 1.2
       min_speed_theta: 0.0
-      acc_lim_x: 2.2
+      acc_lim_x: 3.0
       acc_lim_y: 0.0
-      acc_lim_theta: 1.2
-      decel_lim_x: -2.2
+      acc_lim_theta: 1.0
+      decel_lim_x: -2.5
       decel_lim_y: 0.0
-      decel_lim_theta: -1.2
-      vx_samples: 16
+      decel_lim_theta: -1.0
+      vx_samples: 20
       vy_samples: 0
-      vtheta_samples: 32
+      vtheta_samples: 40
       sim_time: 1.5
-      linear_granularity: 0.03
-      angular_granularity: 0.02
+      linear_granularity: 0.05
+      angular_granularity: 0.025
       transform_tolerance: 0.2
-      xy_goal_tolerance: 0.2
-      trans_stopped_velocity: 0.08
+      xy_goal_tolerance: 0.05
+      trans_stopped_velocity: 0.25
       short_circuit_trajectory_evaluation: true
       stateful: true
       critics:
@@ -144,21 +144,21 @@ controller_server:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 15.0
-      publish_frequency: 10.0
+      update_frequency: 2.0
+      publish_frequency: 1.0
       global_frame: odom
       robot_base_frame: base_link
       transform_tolerance: 1.0
       rolling_window: true
-      width: 5
-      height: 5
-      resolution: 0.03
+      width: 3
+      height: 3
+      resolution: 0.2
       robot_radius: 0.1
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 8.0
-        inflation_radius: 0.38
+        cost_scaling_factor: 10.0
+        inflation_radius: 1.0
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -187,13 +187,13 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 3.0
-      publish_frequency: 3.0
+      update_frequency: 0.5
+      publish_frequency: 0.5
       global_frame: map
       robot_base_frame: base_link
       transform_tolerance: 1.0
       robot_radius: 0.1
-      resolution: 0.03
+      resolution: 0.2
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       obstacle_layer:
@@ -215,8 +215,8 @@ global_costmap:
         map_subscribe_transient_local: True
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 8.0
-        inflation_radius: 0.5
+        cost_scaling_factor: 10.0
+        inflation_radius: 1.0
       always_send_full_costmap: True
 
 # The yaml_filename does not need to be specified since it going to be set by defaults in launch.
@@ -248,7 +248,7 @@ planner_server:
     costmap_update_timeout: 1.0
     GridBased:
       plugin: "nav2_navfn_planner::NavfnPlanner"
-      tolerance: 0.3
+      tolerance: 0.5
       use_astar: true
       allow_unknown: true
 
@@ -329,10 +329,10 @@ velocity_smoother:
     stamp_smoothed_velocity_with_smoothing_time: False
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.55, 0.0, 1.4]
-    min_velocity: [-0.55, 0.0, -1.4]
-    max_accel: [2.2, 0.0, 2.8]
-    max_decel: [-2.2, 0.0, -2.8]
+    max_velocity: [0.5, 0.0, 2.0]
+    min_velocity: [-0.5, 0.0, -2.0]
+    max_accel: [2.5, 0.0, 3.2]
+    max_decel: [-2.5, 0.0, -3.2]
     odom_topic: "odom"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]

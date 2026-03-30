@@ -166,9 +166,10 @@ ros2 launch lab6 nav2_room_bringup.launch.py
 ros2 launch lab6 nav2_room_bringup.launch.py params_profile:=navfn_dijkstra
 ros2 launch lab6 nav2_room_bringup.launch.py params_profile:=smac2d
 ros2 launch lab6 nav2_room_bringup.launch.py params_profile:=rpp
+ros2 launch lab6 nav2_room_bringup.launch.py params_profile:=old
 ```
 
-`navfn_dijkstra` loads `nav2_params_navfn_dijkstra.yaml` (**NavFn** with `use_astar: false`). `smac2d` loads `nav2_params_smac2d.yaml` (**Smac Planner 2D**). `rpp` (or `regulated_pp`) loads `nav2_params_rpp.yaml` (**Regulated Pure Pursuit** as `FollowPath`).
+`navfn_dijkstra` loads `nav2_params_navfn_dijkstra.yaml` (**NavFn** with `use_astar: false`). `smac2d` loads `nav2_params_smac2d.yaml` (**Smac Planner 2D**). `rpp` (or `regulated_pp`) loads `nav2_params_rpp.yaml` (**Regulated Pure Pursuit** as `FollowPath`). **`old`** loads `old.yaml` (original “hard” lab defaults for before/after tuning).
 
 ---
 
