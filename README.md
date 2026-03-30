@@ -60,6 +60,7 @@ code .
 | **[Lab 4](lab4/README.md)** | Dead Reckoning | Integrate velocity commands, compare with Gazebo odometry. Runs with lab3 circle trajectory. |
 | **[Lab 5](lab5/README.md)** | Obstacle Avoidance | Potential fields, Bug, DWA, or RL. TurtleBot3 in maze/forest. |
 | **[Lab 6](lab6/README.md)** | Motion Planning (Nav2) | Nav2 with static map: global/local planners, TurtleBot3 in Gazebo. |
+| **[Lab 7](lab7/README.md)** | TF2 & URDF (RTR arm) | tf2 broadcaster/listener, URDF/Xacro RTR model, joint_state_broadcaster vs sliders. |
 
 ### Development Workflow
 
@@ -118,6 +119,11 @@ robotics_lpnu/
 │   ├── launch/                    # Launch files (you create)
 │   ├── config/robot.rviz         # RViz configuration
 │   └── README.md                  # Lab 2 instructions
+├── lab7/                          # Lab 7: TF2, URDF/Xacro, RTR manipulator
+│   ├── lab7/                      # Python nodes (demos, kinematics)
+│   ├── urdf/                      # rtr_manipulator.xacro
+│   ├── launch/                    # visualize + ros2_control
+│   └── README.md
 ├── docs/                          
 │   └── INSTALLATION_GUIDE.md      # OS setup guide
 ├── docker/                        
