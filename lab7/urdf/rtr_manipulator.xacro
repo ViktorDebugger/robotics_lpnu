@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rtr_manipulator">
   <!-- RTR: Revolute (base yaw) – Prismatic (vertical) – Revolute (elbow). -->
-  <xacro:property name="l2" value="0.9"/>
-  <xacro:property name="l3" value="1.0"/>
-  <xacro:property name="width" value="0.08"/>
+  <xacro:property name="l2" value="1.0"/>
+  <xacro:property name="l3" value="1.1"/>
+  <xacro:property name="width" value="0.07"/>
 
   <material name="blue"><color rgba="0 0 1 1"/></material>
   <material name="red"><color rgba="1 0 0 1"/></material>
@@ -18,6 +18,10 @@
       <geometry><cylinder radius="0.12" length="0.1"/></geometry>
       <material name="grey"/>
     </visual>
+    <collision>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.12" length="0.1"/></geometry>
+    </collision>
   </link>
   <joint name="world_to_base" type="fixed">
     <parent link="world"/>
@@ -36,6 +40,10 @@
       <geometry><cylinder radius="0.06" length="0.3"/></geometry>
       <material name="blue"/>
     </visual>
+    <collision>
+      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.06" length="0.3"/></geometry>
+    </collision>
   </link>
   <joint name="joint_theta1" type="revolute">
     <parent link="base_link"/>
@@ -56,6 +64,10 @@
       <geometry><box size="${width} ${width} ${width}"/></geometry>
       <material name="green"/>
     </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="${width} ${width} ${width}"/></geometry>
+    </collision>
   </link>
   <joint name="joint_theta2" type="prismatic">
     <parent link="link_yaw"/>
@@ -76,6 +88,10 @@
       <geometry><box size="${l2} ${width} ${width}"/></geometry>
       <material name="red"/>
     </visual>
+    <collision>
+      <origin xyz="${l2/2} 0 0" rpy="0 0 0"/>
+      <geometry><box size="${l2} ${width} ${width}"/></geometry>
+    </collision>
   </link>
   <joint name="fixed_carriage_upper" type="fixed">
     <parent link="link_carriage"/>
@@ -94,6 +110,10 @@
       <geometry><box size="${l3} ${width} ${width}"/></geometry>
       <material name="blue"/>
     </visual>
+    <collision>
+      <origin xyz="${l3/2} 0 0" rpy="0 0 0"/>
+      <geometry><box size="${l3} ${width} ${width}"/></geometry>
+    </collision>
   </link>
   <joint name="joint_theta3" type="revolute">
     <parent link="link_upper"/>
