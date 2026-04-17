@@ -10,7 +10,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     urdf_path = os.path.join(
-        get_package_share_directory("so101_description"),
+        get_package_share_directory("lab8"),
         "urdf",
         "so101_new_calib.urdf",
     )
@@ -28,7 +28,6 @@ def generate_launch_description():
     ee_pose_topic = LaunchConfiguration("ee_pose_topic")
     ee_marker_topic = LaunchConfiguration("ee_marker_topic")
     calibration_file = LaunchConfiguration("calibration_file")
-    rviz_config = LaunchConfiguration("rviz_config")
 
     joint_state_reader = Node(
         package="lab8",
@@ -57,15 +56,6 @@ def generate_launch_description():
         executable="robot_state_publisher",
         name="robot_state_publisher",
         output="screen",
-        parameters=[{"robot_description": robot_description}],
-    )
-
-    rviz2 = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="screen",
-        arguments=["-d", rviz_config],
         parameters=[{"robot_description": robot_description}],
     )
 
@@ -128,15 +118,7 @@ def generate_launch_description():
                 ),
                 description="Calibration YAML with raw min/max per joint",
             ),
-            DeclareLaunchArgument(
-                "rviz_config",
-                default_value=PathJoinSubstitution(
-                    [FindPackageShare("lab8"), "config", "lab8.rviz"]
-                ),
-                description="RViz config file",
-            ),
             joint_state_reader,
             robot_state_publisher,
-            rviz2,
         ]
     )

@@ -34,8 +34,7 @@ ros2 launch lab8 so101_real.launch.py \
 
 Launch starts:
 - `joint_state_reader`
-- `robot_state_publisher` (`so101_description/urdf/so101_new_calib.urdf`)
-- `rviz2`
+- `robot_state_publisher` (`lab8` ships `urdf/so101_new_calib.urdf` from [SO-ARM100](https://github.com/TheRobotStudio/SO-ARM100))
 
 ## Student Workflow
 

@@ -10,6 +10,12 @@ ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     ROS_DISTRO=${ROS_DISTRO}
 
+RUN printf '%s\n' \
+    'Acquire::Retries "5";' \
+    'Acquire::http::Timeout "120";' \
+    'Acquire::https::Timeout "120";' \
+    > /etc/apt/apt.conf.d/99docker-retries
+
 # Base OS deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -65,23 +71,39 @@ RUN apt update && apt install -y --no-install-recommends curl \
     && dpkg -i /tmp/ros2-apt-source.deb \
     && rm /tmp/ros2-apt-source.deb
 
-RUN apt update && apt install -y --no-install-recommends \
-    ros-${ROS_DISTRO}-ros-base \
-    ros-${ROS_DISTRO}-ros-gz \
-    ros-${ROS_DISTRO}-turtlesim \
-    ros-${ROS_DISTRO}-demo-nodes-cpp \
-    ros-${ROS_DISTRO}-demo-nodes-py \
-    ros-${ROS_DISTRO}-turtlebot3 \
-    ros-${ROS_DISTRO}-turtlebot3-simulations \
-    ros-${ROS_DISTRO}-nav2-bringup \
-    ros-${ROS_DISTRO}-joint-state-publisher-gui \
-    ros-${ROS_DISTRO}-ros2-control \
-    ros-${ROS_DISTRO}-ros2-controllers \
-    && rm -rf /var/lib/apt/lists/*
+RUN set -eux; \
+    attempt=1; \
+    while [ "$attempt" -le 5 ]; do \
+      apt-get clean || true; \
+      rm -rf /var/lib/apt/lists/* /var/lib/apt/lists/partial || true; \
+      if apt-get update; then \
+        apt-get install -y --no-install-recommends \
+          ros-${ROS_DISTRO}-ros-base \
+          ros-${ROS_DISTRO}-ros-gz \
+          ros-${ROS_DISTRO}-turtlesim \
+          ros-${ROS_DISTRO}-demo-nodes-cpp \
+          ros-${ROS_DISTRO}-demo-nodes-py \
+          ros-${ROS_DISTRO}-turtlebot3 \
+          ros-${ROS_DISTRO}-turtlebot3-simulations \
+          ros-${ROS_DISTRO}-nav2-bringup \
+          ros-${ROS_DISTRO}-joint-state-publisher-gui \
+          ros-${ROS_DISTRO}-ros2-control \
+          ros-${ROS_DISTRO}-ros2-controllers \
+        && rm -rf /var/lib/apt/lists/* \
+        && exit 0; \
+      fi; \
+      attempt=$((attempt + 1)); \
+      echo "apt update/install failed (attempt $attempt/5); mirror may be syncing — retry in 25s"; \
+      sleep 25; \
+    done; \
+    echo "apt failed after 5 attempts"; \
+    exit 1
 
 # install packages
 RUN apt update && apt install -q -y --no-install-recommends \
     python3-apt \
+    python3-serial \
+    python3-yaml \
     python3-colcon-common-extensions \
     python3-colcon-mixin \
     python3-pip \

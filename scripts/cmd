@@ -3,14 +3,22 @@ set -e
 
 XSOCK=/tmp/.X11-unix
 XAUTH=/tmp/.docker.xauth
+SERIAL_DEVICE="${SERIAL_DEVICE:-/dev/ttyACM0}"
 
 case "$1" in
     build-docker)
         docker build -t robotics_intro -f docker/Dockerfile .
         ;;
     run)
+        serial_args=()
+        if [ -e "$SERIAL_DEVICE" ]; then
+            serial_args+=(--device="$SERIAL_DEVICE" --group-add dialout)
+        else
+            echo "Warning: serial device not found at $SERIAL_DEVICE; container will have no USB serial. Set SERIAL_DEVICE or plug the arm." >&2
+        fi
         docker run -it --rm \
             --name robotics_intro \
+            "${serial_args[@]}" \
             --env="QT_X11_NO_MITSHM=1" \
             --env="DISPLAY" \
             -v "$XSOCK:$XSOCK:rw" \

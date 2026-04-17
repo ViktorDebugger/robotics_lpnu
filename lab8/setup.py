@@ -15,6 +15,8 @@ setup(
         (os.path.join("share", package_name, "launch"), glob("launch/*launch*.py")),
         (os.path.join("share", package_name, "config"), glob("config/*.rviz")),
         (os.path.join("share", package_name, "config"), glob("config/*.yaml")),
+        (os.path.join("share", package_name, "urdf"), glob("urdf/*.urdf")),
+        (os.path.join("share", package_name, "urdf", "assets"), glob("urdf/assets/*.stl")),
     ],
     install_requires=["setuptools", "pyserial", "PyYAML"],
     zip_safe=True,
